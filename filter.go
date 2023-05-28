@@ -79,12 +79,10 @@ func newLdapClient(config *config) (*ldap.Conn, error) {
 // authLdap authenticates the user against the ldap server.
 func authLdap(config *config, username, password string) bool {
 	if config.filter != "" {
-		fmt.Printf("search mode, username: %v\n", username)
 		return searchMode(config, username, password)
 	}
 
 	// run with bind mode
-	fmt.Printf("bind mode, username: %v\n", username)
 	client, err := dial(config)
 	if err != nil {
 		fmt.Println("ldap dial error: ", err)
