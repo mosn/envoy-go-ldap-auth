@@ -3,7 +3,7 @@ envoy-go-ldap-auth
 
 This is a simple LDAP auth filter for envoy written in go. Only requests that pass the LDAP server's authentication will be proxied to the upstream service.
 
-During this process, we can optimize the system by implementing user information caching with a duration defined by `config.cache_ttl`. This approach will help reduce the frequency of LDAP server access. If it is set to 0, caching is disabled by default.
+During this process, we can optimize the system by implementing user information caching with a duration defined by `config.cache_ttl`. This approach will help reduce the frequency of LDAP server access. If it is set to 0, caching is disabled.
 
 In terms of caching, we utilize [bigcache](https://github.com/allegro/bigcache), which demonstrates exceptional performance in the evicting cache domain.
 
@@ -176,7 +176,7 @@ If no filter is specified in its configuration, the middleware runs in the defau
 
 If a filter query is specified in the middleware configuration, and the Authentication Source referenced has a `bindDN` and a `bindPassword`, then the middleware runs in search mode. In this mode, a search query with the given filter is issued to the LDAP server before trying to bind. If result of this search returns only 1 record, it tries to issue a bind request with this record, otherwise it aborts a `401 Unauthorized` status code.
 
-## Config
+## Configurations
 
 ### Required
 
@@ -214,7 +214,7 @@ The password corresponding to the `bindDN` specified when running in search mode
 
 - cache_ttl, number, default 0
 
-Cache expiry time in seconds. If it is set to 0, caching is disabled by default.
+Cache expiry time in seconds. If it is set to 0, caching is disabled.
 
 - timeout, number, default 60
 
