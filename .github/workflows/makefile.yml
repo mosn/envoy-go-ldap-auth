@@ -21,3 +21,9 @@ jobs:
 
     - name: build
       run: make build
+
+    - name: test-run
+      run: make test-run
+
+    - name: test
+      run: make test

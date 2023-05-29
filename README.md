@@ -109,9 +109,11 @@ Then, start glauth.
 ./glauth -c sample.yaml
 ```
 
-Once you have activated the filter, you can execute the following command to test it.
+Start and test filter.
 
 ```bash
+make build
+make test-run
 make test
 ```
 
