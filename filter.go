@@ -147,7 +147,7 @@ func (f *filter) verify(header api.RequestHeaderMap) (bool, string) {
 	}
 	if f.config.cacheTTL > 0 {
 		if _, err := f.config.cache.Get(auth); err == nil {
-			fmt.Printf("cache hit, auth: %v\n", auth)
+			// TODO: add a metrics for it, when the Envoy Golang filter support adding metrics dynamically
 			return true, ""
 		}
 	}
@@ -161,7 +161,6 @@ func (f *filter) verify(header api.RequestHeaderMap) (bool, string) {
 		return false, "invalid username or password"
 	}
 	if f.config.cacheTTL > 0 {
-		fmt.Printf("cache set, auth: %v\n", auth)
 		_ = f.config.cache.Set(auth, []byte{})
 	}
 	return true, ""
