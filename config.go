@@ -56,28 +56,29 @@ func (p *parser) Parse(any *anypb.Any) (interface{}, error) {
 
 	v := configStruct.Value
 	conf := &config{}
-	if host, ok := v.AsMap()["host"].(string); ok {
+	m := v.AsMap()
+	if host, ok := m["host"].(string); ok {
 		conf.host = host
 	}
-	if port, ok := v.AsMap()["port"].(float64); ok {
+	if port, ok := m["port"].(float64); ok {
 		conf.port = uint64(port)
 	}
-	if baseDN, ok := v.AsMap()["base_dn"].(string); ok {
+	if baseDN, ok := m["base_dn"].(string); ok {
 		conf.baseDN = baseDN
 	}
-	if attribute, ok := v.AsMap()["attribute"].(string); ok {
+	if attribute, ok := m["attribute"].(string); ok {
 		conf.attribute = attribute
 	}
-	if bindDN, ok := v.AsMap()["bind_dn"].(string); ok {
+	if bindDN, ok := m["bind_dn"].(string); ok {
 		conf.bindDN = bindDN
 	}
-	if password, ok := v.AsMap()["bind_password"].(string); ok {
+	if password, ok := m["bind_password"].(string); ok {
 		conf.password = password
 	}
-	if cFilter, ok := v.AsMap()["filter"].(string); ok {
+	if cFilter, ok := m["filter"].(string); ok {
 		conf.filter = cFilter
 	}
-	if cacheTTL, ok := v.AsMap()["cache_ttl"].(float64); ok {
+	if cacheTTL, ok := m["cache_ttl"].(float64); ok {
 		conf.cacheTTL = int32(cacheTTL)
 	}
 	// default is 0, which means no cache
@@ -94,7 +95,7 @@ func (p *parser) Parse(any *anypb.Any) (interface{}, error) {
 		}
 	}
 
-	if timeout, ok := v.AsMap()["timeout"].(float64); ok {
+	if timeout, ok := m["timeout"].(float64); ok {
 		conf.timeout = int32(timeout)
 	}
 	if conf.timeout == 0 {
@@ -110,7 +111,7 @@ func (p *parser) Merge(parent interface{}, child interface{}) interface{} {
 func configFactory(c interface{}) api.StreamFilterFactory {
 	conf, ok := c.(*config)
 	if !ok {
-		panic("unexpected config type")
+		panic("unexpected config type, should not happen")
 	}
 	return func(callbacks api.FilterCallbackHandler) api.StreamFilter {
 		return &filter{
