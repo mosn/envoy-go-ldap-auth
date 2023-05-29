@@ -3,7 +3,7 @@ build:
 	docker run --rm -v `pwd`:/go/src/go-filter -w /go/src/go-filter \
 		-e GOPROXY=https://goproxy.cn \
 		golang:1.19 \
-		go build -v -o libgolang.so -buildmode=c-shared .
+		go build -v -o libgolang.so -buildmode=c-shared -buildvcs=false .
 
 build-local:
 	GOPROXY=https://goproxy.cn go build -v -o libgolang.so -buildmode=c-shared .
