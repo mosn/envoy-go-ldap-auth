@@ -57,9 +57,6 @@ Then, you can start your filter.
 
 ```bash
 make build
-```
-
-```bash
 make run 
 ```
 
