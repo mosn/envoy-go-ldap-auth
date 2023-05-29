@@ -75,7 +75,8 @@ sample.yaml
   listen = "192.168.64.1:3893" # 192.168.64.1 is your local network IP. Please synchronize it with envoy.yaml.
 ```
 
-envoy.yaml
+envoy.yaml, and you can find this example file in `example` directory
+
 ```yaml
 http_filters:
   - name: envoy.filters.http.golang
@@ -165,7 +166,6 @@ x-fastly-request-id: 5c0885547b1360efd368516eb77213e7a43586ba
 server: envoy
 x-envoy-upstream-service-time: 1974
 ```
-
 
 ## Bind Mode and Search Mode
 

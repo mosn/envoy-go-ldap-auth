@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package example
+package main
 
 import (
 	"encoding/base64"
