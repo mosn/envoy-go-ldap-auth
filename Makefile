@@ -1,12 +1,15 @@
-.PHONY: build run
+.PHONY: build build-local run test
 build:
 	docker run --rm -v `pwd`:/go/src/go-filter -w /go/src/go-filter \
 		-e GOPROXY=https://goproxy.cn \
 		golang:1.19 \
 		go build -v -o libgolang.so -buildmode=c-shared .
 
+build-local:
+	GOPROXY=https://goproxy.cn go build -v -o libgolang.so -buildmode=c-shared .
+
 run:
-	docker run --rm -v `pwd`/envoy.yaml:/etc/envoy/envoy.yaml \
+	docker run --rm -v `pwd`/example/envoy.yaml:/etc/envoy/envoy.yaml \
 		-v `pwd`/libgolang.so:/etc/envoy/libgolang.so \
 		-p 10000:10000 \
 		envoyproxy/envoy:contrib-dev \

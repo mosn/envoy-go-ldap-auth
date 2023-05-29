@@ -15,21 +15,19 @@
  * limitations under the License.
  */
 
-package main
+package example
 
 import (
 	"context"
 	"github.com/allegro/bigcache/v3"
 	xds "github.com/cncf/xds/go/xds/type/v3"
 	"github.com/envoyproxy/envoy/contrib/golang/filters/http/source/go/pkg/api"
-	"github.com/envoyproxy/envoy/contrib/golang/filters/http/source/go/pkg/http"
 	"google.golang.org/protobuf/types/known/anypb"
 	"time"
 )
 
 func init() {
-	http.RegisterHttpFilterConfigFactory("envoy-go-ldap-auth", configFactory)
-	http.RegisterHttpFilterConfigParser(&parser{})
+
 }
 
 type config struct {
@@ -45,10 +43,10 @@ type config struct {
 	cache     *bigcache.BigCache
 }
 
-type parser struct {
+type Parser struct {
 }
 
-func (p *parser) Parse(any *anypb.Any) (interface{}, error) {
+func (p *Parser) Parse(any *anypb.Any) (interface{}, error) {
 	configStruct := &xds.TypedStruct{}
 	if err := any.UnmarshalTo(configStruct); err != nil {
 		return nil, err
@@ -104,11 +102,11 @@ func (p *parser) Parse(any *anypb.Any) (interface{}, error) {
 	return conf, nil
 }
 
-func (p *parser) Merge(parent interface{}, child interface{}) interface{} {
+func (p *Parser) Merge(parent interface{}, child interface{}) interface{} {
 	panic("TODO")
 }
 
-func configFactory(c interface{}) api.StreamFilterFactory {
+func ConfigFactory(c interface{}) api.StreamFilterFactory {
 	conf, ok := c.(*config)
 	if !ok {
 		panic("unexpected config type, should not happen")
