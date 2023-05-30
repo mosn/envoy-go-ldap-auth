@@ -145,12 +145,6 @@ func (f *filter) verify(header api.RequestHeaderMap) (bool, string) {
 	if !ok {
 		return false, "no Authorization"
 	}
-	if f.config.cacheTTL > 0 {
-		if _, err := f.config.cache.Get(auth); err == nil {
-			// TODO: add a metrics for it, when the Envoy Golang filter support adding metrics dynamically
-			return true, ""
-		}
-	}
 
 	username, password, ok := parseUsernameAndPassword(auth)
 	if !ok {
@@ -159,9 +153,6 @@ func (f *filter) verify(header api.RequestHeaderMap) (bool, string) {
 	ok = authLdap(f.config, username, password)
 	if !ok {
 		return false, "invalid username or password"
-	}
-	if f.config.cacheTTL > 0 {
-		_ = f.config.cache.Set(auth, []byte{})
 	}
 	return true, ""
 }

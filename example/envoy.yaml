@@ -37,7 +37,6 @@ static_resources:
                           bind_password: mysecret
                           # if the filter is set, the filter application will run in search mode.
                           filter: (cn=%s)
-                          cache_ttl: 0
                           timeout: 60
 
                   - name: envoy.filters.http.router

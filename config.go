@@ -18,13 +18,10 @@
 package main
 
 import (
-	"context"
-	"github.com/allegro/bigcache/v3"
 	xds "github.com/cncf/xds/go/xds/type/v3"
 	"github.com/envoyproxy/envoy/contrib/golang/filters/http/source/go/pkg/api"
 	"github.com/envoyproxy/envoy/contrib/golang/filters/http/source/go/pkg/http"
 	"google.golang.org/protobuf/types/known/anypb"
-	"time"
 )
 
 func init() {
@@ -40,9 +37,7 @@ type config struct {
 	bindDN    string
 	password  string
 	filter    string
-	cacheTTL  int32
 	timeout   int32
-	cache     *bigcache.BigCache
 }
 
 type parser struct {
@@ -77,22 +72,6 @@ func (p *parser) Parse(any *anypb.Any) (interface{}, error) {
 	}
 	if cFilter, ok := m["filter"].(string); ok {
 		conf.filter = cFilter
-	}
-	if cacheTTL, ok := m["cache_ttl"].(float64); ok {
-		conf.cacheTTL = int32(cacheTTL)
-	}
-	// default is 0, which means no cache
-	var err error
-	if conf.cacheTTL > 0 {
-		conf.cache, err = bigcache.New(
-			context.Background(),
-			bigcache.DefaultConfig(
-				time.Duration(conf.cacheTTL)*time.Second,
-			),
-		)
-		if err != nil {
-			return nil, err
-		}
 	}
 
 	if timeout, ok := m["timeout"].(float64); ok {

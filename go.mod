@@ -3,7 +3,6 @@ module envoy-go-ldap-auth
 go 1.19
 
 require (
-	github.com/allegro/bigcache/v3 v3.1.0
 	github.com/cncf/xds/go v0.0.0-20230428030218-4003588d1b74
 	github.com/envoyproxy/envoy v1.26.1
 	github.com/go-ldap/ldap/v3 v3.4.4
