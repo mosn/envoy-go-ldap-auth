@@ -3,8 +3,6 @@ envoy-go-ldap-auth
 
 This is a simple LDAP auth filter for envoy written in go. Only requests that pass the LDAP server's authentication will be proxied to the upstream service.
 
-In terms of caching, we utilize [bigcache](https://github.com/allegro/bigcache), which demonstrates exceptional performance in the evicting cache domain.
-
 ## Status
 
 This is under active development and is not ready for production use.
