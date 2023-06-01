@@ -1,4 +1,4 @@
-.PHONY: build run test-bind-mode test-search-mode clean
+.PHONY: build run test-bind-mode test-search-mode test-bind test-search clean
 
 build:
 	docker run --rm -v $(PWD):/go/src/go-filter -w /go/src/go-filter \
@@ -43,6 +43,12 @@ test-search-mode:
 	go test test/e2e_search_test.go
 
 	docker rm -f envoy-ldap-test
+
+test-bind:
+	go test test/e2e_search_test.go
+
+test-search:
+	go test test/e2e_search_test.go
 
 clean:
 	docker rm -f envoy-ldap-test
