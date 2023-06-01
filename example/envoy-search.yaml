@@ -33,10 +33,10 @@ static_resources:
                           attribute: cn
                           # optional
                           # be used in search mode
-                          bind_dn: # cn=admin,dc=example,dc=com
-                          bind_password: # mypassword
+                          bind_dn: cn=serviceuser,ou=svcaccts,dc=glauth,dc=com
+                          bind_password: mysecret
                           # if the filter is set, the filter application will run in search mode.
-                          filter: # (&(objectClass=inetOrgPerson)(gidNumber=500)(uid=%s))
+                          filter: (cn=%s)
                           timeout: 60 # unit is second.
 
                   - name: envoy.filters.http.router
