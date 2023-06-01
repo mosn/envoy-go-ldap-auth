@@ -2,9 +2,9 @@ name: e2e
 
 on:
   push:
-    branches: [ "test-ci2" ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "test-ci2" ]
+    branches: [ "main" ]
 
 jobs:
   test-bind:
