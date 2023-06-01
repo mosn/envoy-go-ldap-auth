@@ -120,7 +120,7 @@ make run
 ```
 
 ```bash
-make test-bind
+go test test/e2e_bind_test.go
 ```
 
 ## Bind Mode and Search Mode
