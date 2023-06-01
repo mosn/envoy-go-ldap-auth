@@ -84,7 +84,14 @@ func (p *parser) Parse(any *anypb.Any) (interface{}, error) {
 }
 
 func (p *parser) Merge(parent interface{}, child interface{}) interface{} {
-	panic("TODO")
+	parentConfig := parent.(*config)
+	childConfig := child.(*config)
+
+	newConfig := *parentConfig
+	if childConfig != nil {
+		newConfig = *childConfig
+	}
+	return &newConfig
 }
 
 func configFactory(c interface{}) api.StreamFilterFactory {
