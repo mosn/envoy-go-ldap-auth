@@ -84,7 +84,35 @@ func (p *parser) Parse(any *anypb.Any) (interface{}, error) {
 }
 
 func (p *parser) Merge(parent interface{}, child interface{}) interface{} {
-	panic("TODO")
+	parentConfig := parent.(*config)
+	childConfig := child.(*config)
+
+	newConfig := *parentConfig
+	if childConfig.host != "" {
+		newConfig.host = childConfig.host
+	}
+	if childConfig.port != 0 {
+		newConfig.port = childConfig.port
+	}
+	if childConfig.baseDN != "" {
+		newConfig.baseDN = childConfig.baseDN
+	}
+	if childConfig.attribute != "" {
+		newConfig.attribute = childConfig.attribute
+	}
+	if childConfig.bindDN != "" {
+		newConfig.bindDN = childConfig.bindDN
+	}
+	if childConfig.password != "" {
+		newConfig.password = childConfig.password
+	}
+	if childConfig.filter != "" {
+		newConfig.filter = childConfig.filter
+	}
+	if childConfig.timeout != 0 {
+		newConfig.timeout = childConfig.timeout
+	}
+	return &newConfig
 }
 
 func configFactory(c interface{}) api.StreamFilterFactory {
