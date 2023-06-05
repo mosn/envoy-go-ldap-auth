@@ -21,7 +21,7 @@ An example of the `Authorization` header is as follows (`aGFja2Vyczpkb2dvb2Q=`, 
 Authorization: Basic aGFja2Vyczpkb2dvb2Q=
 ```
 
-Configure your envoy.yaml, include required fields: host, port, base_dn and attribute.
+Configure your envoy.yaml, include required fields: host, port, baseDn and attribute.
 
 ```yaml
 http_filters:
@@ -37,12 +37,12 @@ http_filters:
           # required
           host: localhost
           port: 389
-          base_dn: dc=example,dc=com
+          baseDn: dc=example,dc=com
           attribute: cn
           # optional
           # be used in search mode
-          bind_dn: # cn=admin,dc=example,dc=com
-          bind_password: # mypassword
+          bindDn: # cn=admin,dc=example,dc=com
+          bindPassword: # mypassword
           # if the filter is set, the filter application will run in search mode.
           filter: # (&(objectClass=inetOrgPerson)(gidNumber=500)(uid=%s))
           timeout: 60 # unit is second.
@@ -96,12 +96,12 @@ http_filters:
         # required
         host: localhost
         port: 3893
-        base_dn: dc=glauth,dc=com
+        baseDn: dc=glauth,dc=com
         attribute: cn
         # optional
         # be used in search mode
-        bind_dn: # cn=admin,dc=example,dc=com
-        bind_password: # mypassword
+        bindDn: # cn=admin,dc=example,dc=com
+        bindPassword: # mypassword
         # if the filter is set, the filter application will run in search mode.
         filter: # (&(objectClass=inetOrgPerson)(gidNumber=500)(uid=%s))
         timeout: 60 # unit is second.
@@ -141,7 +141,7 @@ Host on which the LDAP server is running.
 
 TCP port where the LDAP server is listening. 389 is the default port for LDAP.
 
-- base_dn, string, "dc=example,dc=com", required
+- baseDn, string, "dc=example,dc=com", required
 
 The `baseDN` option should be set to the base domain name that should be used for bind and search queries.
 
@@ -157,11 +157,11 @@ If not empty, the middleware will run in search mode, filtering search results w
 
 Filter queries can use the `%s` placeholder that is replaced by the username provided in the `Authorization` header of the request. For example: `(&(objectClass=inetOrgPerson)(gidNumber=500)(uid=%s))`, `(cn=%s)`.
 
-- bind_dn, string, default ""
+- bindDn, string, default ""
 
 The domain name to bind to in order to authenticate to the LDAP server when running on search mode. Leaving this empty with search mode means binds are anonymous, which is rarely expected behavior. It is not used when running in bind_mode.
 
-- bind_password, string, default ""
+- bindPassword, string, default ""
 
 The password corresponding to the `bindDN` specified when running in search mode, used in order to authenticate to the LDAP server.
 
