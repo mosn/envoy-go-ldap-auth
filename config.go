@@ -58,16 +58,16 @@ func (p *parser) Parse(any *anypb.Any) (interface{}, error) {
 	if port, ok := m["port"].(float64); ok {
 		conf.port = uint64(port)
 	}
-	if baseDN, ok := m["base_dn"].(string); ok {
+	if baseDN, ok := m["baseDn"].(string); ok {
 		conf.baseDN = baseDN
 	}
 	if attribute, ok := m["attribute"].(string); ok {
 		conf.attribute = attribute
 	}
-	if bindDN, ok := m["bind_dn"].(string); ok {
+	if bindDN, ok := m["bindDn"].(string); ok {
 		conf.bindDN = bindDN
 	}
-	if password, ok := m["bind_password"].(string); ok {
+	if password, ok := m["bindPassword"].(string); ok {
 		conf.password = password
 	}
 	if cFilter, ok := m["filter"].(string); ok {

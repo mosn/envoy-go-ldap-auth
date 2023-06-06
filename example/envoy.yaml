@@ -29,12 +29,12 @@ static_resources:
                           # required
                           host: localhost
                           port: 3893
-                          base_dn: dc=glauth,dc=com
+                          baseDn: dc=glauth,dc=com
                           attribute: cn
                           # optional
                           # be used in search mode
-                          bind_dn: # cn=admin,dc=example,dc=com
-                          bind_password: # mypassword
+                          bindDn: # cn=admin,dc=example,dc=com
+                          bindPassword: # mypassword
                           # if the filter is set, the filter application will run in search mode.
                           filter: # (&(objectClass=inetOrgPerson)(gidNumber=500)(uid=%s))
                           timeout: 60 # unit is second.
