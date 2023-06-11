@@ -99,9 +99,9 @@ jobs:
           ./glauth -c sample.cfg &
           sleep 5
 
-      - name: test-search-mode
+      - name: test-tls
         run: |
-          sed -i "s/host: localhost/host: $(ifconfig eth0 | awk '/inet / {print $2}')/" example/envoy-search.yaml
+          sed -i "s/host: localhost/host: $(ifconfig eth0 | awk '/inet / {print $2}')/" example/envoy-tls.yaml
           awk 'FNR==NR{a=a$0"\\n";next} /certificateAuthority: # ""/{sub(/certificateAuthority: # ""/, "certificateAuthority: \""a"\"")} 1' glauth.crt example/envoy-tls.yaml > example/envoy.yaml.tmp && mv example/envoy.yaml.tmp example/envoy-tls.yaml
           
           make test-tls
