@@ -30,14 +30,18 @@ func init() {
 }
 
 type config struct {
-	host      string
-	port      uint64
-	baseDN    string
-	attribute string
-	bindDN    string
-	password  string
-	filter    string
-	timeout   int32
+	host                 string
+	port                 uint64
+	baseDN               string
+	attribute            string
+	bindDN               string
+	password             string
+	filter               string
+	timeout              int32
+	tls                  bool
+	startTLS             bool
+	insecureSkipVerify   bool
+	certificateAuthority string
 }
 
 type parser struct {
@@ -73,12 +77,23 @@ func (p *parser) Parse(any *anypb.Any) (interface{}, error) {
 	if cFilter, ok := m["filter"].(string); ok {
 		conf.filter = cFilter
 	}
-
 	if timeout, ok := m["timeout"].(float64); ok {
 		conf.timeout = int32(timeout)
 	}
 	if conf.timeout == 0 {
 		conf.timeout = 60
+	}
+	if tls, ok := m["tls"].(bool); ok {
+		conf.tls = tls
+	}
+	if startTLS, ok := m["startTls"].(bool); ok {
+		conf.startTLS = startTLS
+	}
+	if insecureSkipVerify, ok := m["insecureSkipVerify"].(bool); ok {
+		conf.insecureSkipVerify = insecureSkipVerify
+	}
+	if certificateAuthority, ok := m["certificateAuthority"].(string); ok {
+		conf.certificateAuthority = certificateAuthority
 	}
 	return conf, nil
 }
@@ -111,6 +126,18 @@ func (p *parser) Merge(parent interface{}, child interface{}) interface{} {
 	}
 	if childConfig.timeout != 0 {
 		newConfig.timeout = childConfig.timeout
+	}
+	if childConfig.tls {
+		newConfig.tls = childConfig.tls
+	}
+	if childConfig.startTLS {
+		newConfig.startTLS = childConfig.startTLS
+	}
+	if childConfig.insecureSkipVerify {
+		newConfig.insecureSkipVerify = childConfig.insecureSkipVerify
+	}
+	if childConfig.certificateAuthority != "" {
+		newConfig.certificateAuthority = childConfig.certificateAuthority
 	}
 	return &newConfig
 }

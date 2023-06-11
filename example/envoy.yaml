@@ -38,6 +38,10 @@ static_resources:
                           # if the filter is set, the filter application will run in search mode.
                           filter: # (&(objectClass=inetOrgPerson)(gidNumber=500)(uid=%s))
                           timeout: 60 # unit is second.
+                          tls: # false
+                          startTLS: # false
+                          insecureSkipVerify: # false
+                          certificateAuthority: # ""
 
                   - name: envoy.filters.http.router
                     typed_config:

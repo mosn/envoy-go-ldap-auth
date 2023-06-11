@@ -18,6 +18,8 @@
 package main
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/base64"
 	"fmt"
 	"github.com/envoyproxy/envoy/contrib/golang/filters/http/source/go/pkg/api"
@@ -32,6 +34,8 @@ type filter struct {
 	config    *config
 }
 
+// parseUsernameAndPassword parses an HTTP Basic Authentication string.
+// provide "Basic aGFja2Vyczpkb2dvb2Q=", return ("hackers", "dogood", true).
 func parseUsernameAndPassword(auth string) (username, password string, ok bool) {
 	const prefix = "Basic "
 	if len(auth) < len(prefix) || !strings.EqualFold(auth[:len(prefix)], prefix) {
@@ -49,25 +53,69 @@ func parseUsernameAndPassword(auth string) (username, password string, ok bool) 
 	return username, password, true
 }
 
-func dial(config *config) (*ldap.Conn, error) {
+func Connect(conf *config) (*ldap.Conn, error) {
+	var certPool *x509.CertPool
+
+	if conf.certificateAuthority != "" {
+		certPool = x509.NewCertPool()
+		certPool.AppendCertsFromPEM([]byte(conf.certificateAuthority))
+	}
+
+	var conn *ldap.Conn = nil
+	var err error = nil
+	if conf.tls {
+		tlsCfg := &tls.Config{
+			InsecureSkipVerify: conf.insecureSkipVerify,
+			ServerName:         conf.host,
+			RootCAs:            certPool,
+		}
+		if conf.startTLS {
+			conn, err = dial(conf)
+			if err == nil {
+				err = conn.StartTLS(tlsCfg)
+			}
+		} else {
+			conn, err = dialTLS(conf, tlsCfg)
+		}
+	} else {
+		conn, err = dial(conf)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+	return conn, nil
+}
+
+func dialTLS(conf *config, tlsCfg *tls.Config) (*ldap.Conn, error) {
 	return ldap.DialURL(
-		// TODO: support TLS
-		fmt.Sprintf("ldap://%s:%d", config.host, config.port),
+		fmt.Sprintf("ldaps://%s:%d", conf.host, conf.port),
+		ldap.DialWithTLSDialer(
+			tlsCfg,
+			&net.Dialer{
+				Timeout: time.Duration(conf.timeout) * time.Second,
+			}),
+	)
+}
+
+func dial(conf *config) (*ldap.Conn, error) {
+	return ldap.DialURL(
+		fmt.Sprintf("ldap://%s:%d", conf.host, conf.port),
 		ldap.DialWithDialer(&net.Dialer{
-			Timeout: time.Duration(config.timeout) * time.Second,
+			Timeout: time.Duration(conf.timeout) * time.Second,
 		}),
 	)
 }
 
 // newLdapClient creates a new ldap client.
-func newLdapClient(config *config) (*ldap.Conn, error) {
-	client, err := dial(config)
+func newLdapClient(conf *config) (*ldap.Conn, error) {
+	client, err := Connect(conf)
 	if err != nil {
 		return nil, err
 	}
 
-	err = client.Bind(config.bindDN, config.password)
 	// First bind with a read only user
+	err = client.Bind(conf.bindDN, conf.password)
 	if err != nil {
 		return nil, err
 	}
@@ -77,18 +125,25 @@ func newLdapClient(config *config) (*ldap.Conn, error) {
 // authLdap authenticates the user against the ldap server.
 func (f *filter) authLdap(username, password string) bool {
 	if f.config.filter != "" {
+		f.callbacks.Log(api.Debug, "running in search mode")
 		return f.searchMode(username, password)
 	}
 
 	// run with bind mode
-	client, err := dial(f.config)
+	f.callbacks.Log(api.Debug, "running in bind mode")
+
+	client, err := Connect(f.config)
 	if err != nil {
 		f.callbacks.Log(api.Error, fmt.Sprintf("dial error: %v", err))
 		return false
 	}
 
+	userDN := fmt.Sprintf("%s=%s,%s", f.config.attribute, username, f.config.baseDN)
+	f.callbacks.Log(api.Debug, fmt.Sprintf("Authenticating User: %s", userDN))
+
+	// SimpleBind User and password.
 	_, err = client.SimpleBind(&ldap.SimpleBindRequest{
-		Username: fmt.Sprintf("%s=%s,%s", f.config.attribute, username, f.config.baseDN),
+		Username: userDN,
 		Password: password,
 	})
 	return err == nil
@@ -111,24 +166,36 @@ func (f *filter) searchMode(username, password string) (auth bool) {
 		}
 	}()
 
-	req := ldap.NewSearchRequest(f.config.baseDN,
-		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
+	req := ldap.NewSearchRequest(
+		f.config.baseDN,
+		ldap.ScopeWholeSubtree,
+		ldap.NeverDerefAliases,
+		0,
+		0,
+		false,
 		fmt.Sprintf(f.config.filter, username),
-		[]string{f.config.attribute}, nil)
+		[]string{"dn", "cn"}, nil)
 
 	sr, err := client.Search(req)
 	if err != nil {
-		f.callbacks.Log(api.Debug, fmt.Sprintf("search error: %v", err))
+		f.callbacks.Log(api.Error, fmt.Sprintf("search error: %v", err))
 		return
 	}
 
-	if len(sr.Entries) != 1 {
-		f.callbacks.Log(api.Debug, fmt.Sprintf("search not found: %v", err))
+	switch {
+	case len(sr.Entries) < 1:
+		f.callbacks.Log(api.Debug, "search filter return empty result")
+		return
+	case len(sr.Entries) > 1:
+		f.callbacks.Log(api.Debug, fmt.Sprintf("search filter return multiple entries (%d)", len(sr.Entries)))
 		return
 	}
 
-	userDn := sr.Entries[0].DN
-	err = client.Bind(userDn, password)
+	userDN := sr.Entries[0].DN
+	f.callbacks.Log(api.Debug, fmt.Sprintf("authenticating user: %s", userDN))
+
+	// Bind User and password.
+	err = client.Bind(userDN, password)
 	if err != nil {
 		f.callbacks.Log(api.Debug, fmt.Sprintf("bind error: %v", err))
 		return
