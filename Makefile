@@ -1,4 +1,4 @@
-.PHONY: build run test-bind-mode test-search-mode clean
+.PHONY: build run test-bind-mode test-search-mode test-tls clean
 
 build:
 	docker run --rm -v $(PWD):/go/src/go-filter -w /go/src/go-filter \
@@ -41,6 +41,20 @@ test-search-mode:
 		envoy -c /etc/envoy/envoy.yaml &
 	sleep 5
 	go test test/e2e_search_test.go
+
+	docker rm -f envoy-ldap-test
+
+test-tls:
+	docker rm -f envoy-ldap-test
+	docker run --rm -v $(PWD)/example/envoy-tls.yaml:/etc/envoy/envoy.yaml \
+		-v $(PWD)/libgolang.so:/etc/envoy/libgolang.so \
+		-e "GODEBUG=cgocheck=0" \
+		-p 10000:10000 \
+		--name envoy-ldap-test \
+		envoyproxy/envoy:contrib-v1.26.1 \
+		envoy -c /etc/envoy/envoy.yaml &
+	sleep 5
+	go test test/e2e_bind_test.go
 
 	docker rm -f envoy-ldap-test
 

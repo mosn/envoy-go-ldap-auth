@@ -46,6 +46,10 @@ http_filters:
           # if the filter is set, the filter application will run in search mode.
           filter: # (&(objectClass=inetOrgPerson)(gidNumber=500)(uid=%s))
           timeout: 60 # unit is second.
+          tls: # false
+          startTLS: # false
+          insecureSkipVerify: # false
+          certificateAuthority: # ""
 ```
 
 Then, you can start your filter.
@@ -93,18 +97,22 @@ http_filters:
       plugin_config:
         "@type": type.googleapis.com/xds.type.v3.TypedStruct
         value:
-        # required
-        host: localhost
-        port: 3893
-        baseDn: dc=glauth,dc=com
-        attribute: cn
-        # optional
-        # be used in search mode
-        bindDn: # cn=admin,dc=example,dc=com
-        bindPassword: # mypassword
-        # if the filter is set, the filter application will run in search mode.
-        filter: # (&(objectClass=inetOrgPerson)(gidNumber=500)(uid=%s))
-        timeout: 60 # unit is second.
+          # required
+          host: localhost
+          port: 3893
+          baseDn: dc=glauth,dc=com
+          attribute: cn
+          # optional
+          # be used in search mode
+          bindDn: # cn=admin,dc=example,dc=com
+          bindPassword: # mypassword
+          # if the filter is set, the filter application will run in search mode.
+          filter: # (&(objectClass=inetOrgPerson)(gidNumber=500)(uid=%s))
+          timeout: 60 # unit is second.
+          tls: # false
+          startTLS: # false
+          insecureSkipVerify: # false
+          certificateAuthority: # "
 ```
 
 Replace the host of the LDAP server with your ip address.
@@ -168,3 +176,15 @@ The password corresponding to the `bindDN` specified when running in search mode
 - timeout, number, default 60
 
 An optional timeout in seconds when waiting for connection with LDAP server.
+
+- tls, bool, default false
+
+Set to true if LDAP server should use an encrypted TLS connection, either with StartTLS or regular TLS.
+
+- startTLS, bool, default false
+
+If set to true, instructs this filter to issue a StartTLS request when initializing the connection with the LDAP server. If the startTLS setting is enabled, it is important to ensure that the tls setting is also enabled.
+
+- insecureSkipVerify, bool, default false
+
+When TLS is enabled, the connection to the LDAP server is verified to be secure. This option allows the filter to proceed and operate even for server connections otherwise considered insecure.
