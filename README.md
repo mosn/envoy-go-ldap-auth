@@ -49,7 +49,7 @@ http_filters:
           tls: # false
           startTLS: # false
           insecureSkipVerify: # false
-          certificateAuthority: # ""
+          rootCA: # ""
 ```
 
 Then, you can start your filter.
@@ -112,7 +112,7 @@ http_filters:
           tls: # false
           startTLS: # false
           insecureSkipVerify: # false
-          certificateAuthority: # "
+          rootCA: # "
 ```
 
 Replace the host of the LDAP server with your ip address.
@@ -183,8 +183,12 @@ Set to true if LDAP server should use an encrypted TLS connection, either with S
 
 - startTLS, bool, default false
 
-If set to true, instructs this filter to issue a StartTLS request when initializing the connection with the LDAP server. If the startTLS setting is enabled, it is important to ensure that the tls setting is also enabled.
+If set to true, instructs this filter to issue a StartTLS request(sends the command to start a TLS session and then creates a new TLS Client) when initializing the connection with the LDAP server. If the startTLS setting is enabled, it is important to ensure that the tls setting is also enabled.
 
 - insecureSkipVerify, bool, default false
 
 When TLS is enabled, the connection to the LDAP server is verified to be secure. This option allows the filter to proceed and operate even for server connections otherwise considered insecure.
+
+- rootCA, string, default ""
+
+The rootCA option should contain one or more PEM-encoded certificates to use to establish a connection with the LDAP server if the connection uses TLS but that the certificate was signed by a custom Certificate Authority.

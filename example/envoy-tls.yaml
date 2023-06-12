@@ -41,7 +41,7 @@ static_resources:
                           tls: true # false
                           startTLS: # false
                           insecureSkipVerify: false # false
-                          certificateAuthority: # ""
+                          rootCA: # ""
 
                   - name: envoy.filters.http.router
                     typed_config:

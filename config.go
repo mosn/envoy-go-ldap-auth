@@ -30,18 +30,18 @@ func init() {
 }
 
 type config struct {
-	host                 string
-	port                 uint64
-	baseDN               string
-	attribute            string
-	bindDN               string
-	password             string
-	filter               string
-	timeout              int32
-	tls                  bool
-	startTLS             bool
-	insecureSkipVerify   bool
-	certificateAuthority string
+	host               string
+	port               uint64
+	baseDN             string
+	attribute          string
+	bindDN             string
+	password           string
+	filter             string
+	timeout            int32
+	tls                bool
+	startTLS           bool
+	insecureSkipVerify bool
+	rootCA             string
 }
 
 type parser struct {
@@ -92,8 +92,8 @@ func (p *parser) Parse(any *anypb.Any) (interface{}, error) {
 	if insecureSkipVerify, ok := m["insecureSkipVerify"].(bool); ok {
 		conf.insecureSkipVerify = insecureSkipVerify
 	}
-	if certificateAuthority, ok := m["certificateAuthority"].(string); ok {
-		conf.certificateAuthority = certificateAuthority
+	if rootCA, ok := m["rootCA"].(string); ok {
+		conf.rootCA = rootCA
 	}
 	return conf, nil
 }
@@ -136,8 +136,8 @@ func (p *parser) Merge(parent interface{}, child interface{}) interface{} {
 	if childConfig.insecureSkipVerify {
 		newConfig.insecureSkipVerify = childConfig.insecureSkipVerify
 	}
-	if childConfig.certificateAuthority != "" {
-		newConfig.certificateAuthority = childConfig.certificateAuthority
+	if childConfig.rootCA != "" {
+		newConfig.rootCA = childConfig.rootCA
 	}
 	return &newConfig
 }

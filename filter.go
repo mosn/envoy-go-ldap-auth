@@ -54,11 +54,11 @@ func parseUsernameAndPassword(auth string) (username, password string, ok bool) 
 }
 
 func Connect(conf *config) (*ldap.Conn, error) {
-	var certPool *x509.CertPool
+	var rootCA *x509.CertPool
 
-	if conf.certificateAuthority != "" {
-		certPool = x509.NewCertPool()
-		certPool.AppendCertsFromPEM([]byte(conf.certificateAuthority))
+	if conf.rootCA != "" {
+		rootCA = x509.NewCertPool()
+		rootCA.AppendCertsFromPEM([]byte(conf.rootCA))
 	}
 
 	var conn *ldap.Conn = nil
@@ -67,7 +67,7 @@ func Connect(conf *config) (*ldap.Conn, error) {
 		tlsCfg := &tls.Config{
 			InsecureSkipVerify: conf.insecureSkipVerify,
 			ServerName:         conf.host,
-			RootCAs:            certPool,
+			RootCAs:            rootCA,
 		}
 		if conf.startTLS {
 			conn, err = dial(conf)
