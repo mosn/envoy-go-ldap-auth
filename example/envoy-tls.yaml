@@ -28,7 +28,7 @@ static_resources:
                         value:
                           # required
                           host: localhost
-                          port: 3893
+                          port: 3894
                           baseDn: dc=glauth,dc=com
                           attribute: cn
                           # optional
@@ -38,9 +38,9 @@ static_resources:
                           # if the filter is set, the filter application will run in search mode.
                           filter: # (&(objectClass=inetOrgPerson)(gidNumber=500)(uid=%s))
                           timeout: 60 # unit is second.
-                          tls: # false
+                          tls: true # false
                           startTLS: # false
-                          insecureSkipVerify: # false
+                          insecureSkipVerify: false # false
                           rootCA: # ""
 
                   - name: envoy.filters.http.router

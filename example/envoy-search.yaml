@@ -38,6 +38,10 @@ static_resources:
                           # if the filter is set, the filter application will run in search mode.
                           filter: (cn=%s)
                           timeout: 60 # unit is second.
+                          tls: # false
+                          startTLS: # false
+                          insecureSkipVerify: # false
+                          rootCA: # ""
 
                   - name: envoy.filters.http.router
                     typed_config:
