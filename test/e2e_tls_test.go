@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func startEnvoySearch(configPath string) {
+func startEnvoyTLS(configPath string) {
 	cmd := exec.Command("envoy", "-c", configPath)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -23,11 +23,12 @@ func startEnvoySearch(configPath string) {
 	}
 }
 
-func TestSearch(t *testing.T) {
-	go startEnvoySearch("../example/envoy-search.yaml")
-	time.Sleep(5 * time.Second)
-	req, err := http.NewRequest(http.MethodGet, "http://localhost:10000/", nil)
+func TestBindTLS(t *testing.T) {
 
+	go startEnvoyTLS("../example/envoy-tls.yaml")
+	time.Sleep(5 * time.Second)
+
+	req, err := http.NewRequest(http.MethodGet, "http://localhost:10000/", nil)
 	resp1, err := http.DefaultClient.Do(req)
 	if err != nil {
 		t.Fatal(err)
@@ -57,6 +58,5 @@ func TestSearch(t *testing.T) {
 	if resp4.StatusCode != http.StatusOK {
 		t.Fatalf("unexpected status code: %v", resp4.StatusCode)
 	}
-
-	t.Log("TestSearch passed")
+	t.Log("TestBind passed")
 }

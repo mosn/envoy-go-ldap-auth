@@ -1,13 +1,34 @@
 package test
 
 import (
+	"fmt"
 	"net/http"
+	"os"
+	"os/exec"
 	"testing"
+	"time"
 )
 
-func TestE2EBind(t *testing.T) {
-	req, err := http.NewRequest(http.MethodGet, "http://localhost:10000/", nil)
+func startEnvoy(configPath string) {
+	cmd := exec.Command("envoy", "-c", configPath)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Start()
+	if err != nil {
+		panic(fmt.Sprintf("failed to start envoy: %v", err))
+	}
+	err = cmd.Wait()
+	if err != nil {
+		panic(fmt.Sprintf("failed to wait envoy: %v", err))
+	}
+}
 
+func TestBind(t *testing.T) {
+
+	go startEnvoy("../example/envoy.yaml")
+	time.Sleep(5 * time.Second)
+
+	req, err := http.NewRequest(http.MethodGet, "http://localhost:10000/", nil)
 	resp1, err := http.DefaultClient.Do(req)
 	if err != nil {
 		t.Fatal(err)
@@ -37,7 +58,5 @@ func TestE2EBind(t *testing.T) {
 	if resp4.StatusCode != http.StatusOK {
 		t.Fatalf("unexpected status code: %v", resp4.StatusCode)
 	}
-
-	t.Log("E2E test passed")
-
+	t.Log("TestBind passed")
 }
