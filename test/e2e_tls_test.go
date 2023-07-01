@@ -56,5 +56,5 @@ func TestBindTLS(t *testing.T) {
 	if resp4.StatusCode != http.StatusOK {
 		t.Fatalf("unexpected status code: %v", resp4.StatusCode)
 	}
-	t.Log("TestBind passed")
+	t.Log("TestBindTLS passed")
 }
