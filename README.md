@@ -36,8 +36,8 @@ http_filters:
         value:
           # required
           host: localhost
-          port: 389
-          baseDn: dc=example,dc=com
+          port: 3894
+          baseDn: dc=glauth,dc=com
           attribute: cn
           # optional
           # be used in search mode
@@ -72,10 +72,6 @@ chmod +x glauth
 
 # download sample config file of glauth
 curl -L -o sample.cfg https://raw.githubusercontent.com/glauth/glauth/master/v2/sample-simple.cfg
-
-# modify sample.cfg, replace listen address with your ip address.
-# In Linux, you can execute it as follows:
-sed -i "s#listen = \"0.0.0.0:3893\"#listen = \"$(ifconfig en0 | grep 'inet ' | awk '{print $2}'):3893\"#" sample.cfg
 ```
 
 Then, start glauth.
@@ -84,51 +80,10 @@ Then, start glauth.
 ./glauth -c sample.cfg
 ```
 
-Modify your envoy.yaml, and you can find this example file in `example` directory.
-
-```yaml
-http_filters:
-  - name: envoy.filters.http.golang
-    typed_config:
-      "@type": type.googleapis.com/envoy.extensions.filters.http.golang.v3alpha.Config
-      library_id: example
-      library_path: /etc/envoy/libgolang.so
-      plugin_name: envoy-go-ldap-auth
-      plugin_config:
-        "@type": type.googleapis.com/xds.type.v3.TypedStruct
-        value:
-          # required
-          host: localhost
-          port: 3893
-          baseDn: dc=glauth,dc=com
-          attribute: cn
-          # optional
-          # be used in search mode
-          bindDn: # cn=admin,dc=example,dc=com
-          bindPassword: # mypassword
-          # if the filter is set, the filter application will run in search mode.
-          filter: # (&(objectClass=inetOrgPerson)(gidNumber=500)(uid=%s))
-          timeout: 60 # unit is second.
-          tls: # false
-          startTLS: # false
-          insecureSkipVerify: # false
-          rootCA: # "
-```
-
-Replace the host of the LDAP server with your ip address.
-```bash
-sed -i "s/host: localhost/host: $(ifconfig en0 | awk '/inet / {print $2}')/" example/envoy.yaml
-```
-
-Start and test filter.
+Run it with the example config file.
 
 ```bash
-make build
-make run
-```
-
-```bash
-go test test/e2e_bind_test.go
+go test test/e2e_bind_test.go test/common.go
 ```
 
 ## Bind Mode and Search Mode
