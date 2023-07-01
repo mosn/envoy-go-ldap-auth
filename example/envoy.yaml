@@ -28,7 +28,7 @@ static_resources:
                         value:
                           # required
                           host: localhost
-                          port: 3893
+                          port: 3894
                           baseDn: dc=glauth,dc=com
                           attribute: cn
                           # optional
