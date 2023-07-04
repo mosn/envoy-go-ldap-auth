@@ -2,9 +2,12 @@ name: e2e
 on: [pull_request, push]
 
 jobs:
-  test-bind:
+  e2e-bind:
     runs-on: ubuntu-latest
-
+    env:
+      GODEBUG: cgocheck=0
+      ENVOY_VERSION: v1.26.2
+      GO_VERSION: 1.19
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -12,7 +15,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
-          go-version: 1.19
+          go-version: ${{ env.GO_VERSION }}
 
       - name: prepare glauth
         run: |
@@ -25,18 +28,32 @@ jobs:
       - name: run glauth
         run: |
           curl -L -o sample.cfg https://raw.githubusercontent.com/glauth/glauth/master/v2/sample-simple.cfg
-          sed -i "s#listen = \"0.0.0.0:3893\"#listen = \"$(ifconfig eth0 | grep 'inet ' | awk '{print $2}'):3893\"#" sample.cfg
           ./glauth -c sample.cfg &
           sleep 5
 
-      - name: test-bind-mode
+      - name: build
         run: |
-          sed -i "s/host: localhost/host: $(ifconfig eth0 | awk '/inet / {print $2}')/" example/envoy.yaml
-          make test-bind-mode
+          make build
+          sudo mkdir -p /etc/envoy
+          sudo cp libgolang.so /etc/envoy/libgolang.so
 
-  test-search:
+      - name: envoy
+        run: |
+          curl -L -o envoy https://github.com/envoyproxy/envoy/releases/download/${ENVOY_VERSION}/envoy-contrib-x86_64
+          chmod +x envoy
+          sudo cp envoy /usr/bin/envoy
+          sudo chmod +x /usr/bin/envoy
+
+      - name: test
+        run: |
+          go test test/e2e_bind_test.go test/common.go
+
+  e2e-search:
     runs-on: ubuntu-latest
-
+    env:
+      GODEBUG: cgocheck=0
+      ENVOY_VERSION: v1.26.2
+      GO_VERSION: 1.19
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -44,7 +61,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
-          go-version: 1.19
+          go-version: ${{ env.GO_VERSION }}
 
       - name: prepare glauth
         run: |
@@ -57,18 +74,32 @@ jobs:
       - name: run glauth
         run: |
           curl -L -o sample.cfg https://raw.githubusercontent.com/glauth/glauth/master/v2/sample-simple.cfg
-          sed -i "s#listen = \"0.0.0.0:3893\"#listen = \"$(ifconfig eth0 | grep 'inet ' | awk '{print $2}'):3893\"#" sample.cfg
           ./glauth -c sample.cfg &
           sleep 5
 
-      - name: test-search-mode
+      - name: build
         run: |
-          sed -i "s/host: localhost/host: $(ifconfig eth0 | awk '/inet / {print $2}')/" example/envoy-search.yaml
-          make test-search-mode
+          make build
+          sudo mkdir -p /etc/envoy
+          sudo cp libgolang.so /etc/envoy/libgolang.so
 
-  test-tls:
+      - name: envoy
+        run: |
+          curl -L -o envoy https://github.com/envoyproxy/envoy/releases/download/${ENVOY_VERSION}/envoy-contrib-x86_64
+          chmod +x envoy
+          sudo cp envoy /usr/bin/envoy
+          sudo chmod +x /usr/bin/envoy
+
+      - name: test
+        run: |
+          go test test/e2e_search_test.go test/common.go
+
+  e2e-tls:
     runs-on: ubuntu-latest
-
+    env:
+      GODEBUG: cgocheck=0
+      ENVOY_VERSION: v1.26.2
+      GO_VERSION: 1.19
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -76,7 +107,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
-          go-version: 1.19
+          go-version: ${{ env.GO_VERSION }}
 
       - name: prepare glauth
         run: |
@@ -90,18 +121,26 @@ jobs:
           openssl genpkey -algorithm RSA -out glauth.key -pkeyopt rsa_keygen_bits:2048
           openssl req -new -key glauth.key -out glauth.csr -config example/tls/csr.conf
           openssl x509 -req -in glauth.csr -signkey glauth.key -out glauth.crt -extensions req_ext -extfile example/tls/csr.conf -days 365
-
-      - name: build
-        run: make build
+          cp glauth.crt test/glauth.crt
 
       - name: run glauth
         run: |
           ./glauth -c sample.cfg &
           sleep 5
 
-      - name: test-tls
+      - name: build
         run: |
-          sed -i "s/host: localhost/host: $(ifconfig eth0 | awk '/inet / {print $2}')/" example/envoy-tls.yaml
-          awk 'FNR==NR{a=a$0"\\n";next} /rootCA: # ""/{sub(/rootCA: # ""/, "rootCA: \""a"\"")} 1' glauth.crt example/envoy-tls.yaml > example/envoy.yaml.tmp && mv example/envoy.yaml.tmp example/envoy-tls.yaml
-          
-          make test-tls
+          make build
+          sudo mkdir -p /etc/envoy
+          sudo cp libgolang.so /etc/envoy/libgolang.so
+
+      - name: envoy
+        run: |
+          curl -L -o envoy https://github.com/envoyproxy/envoy/releases/download/${ENVOY_VERSION}/envoy-contrib-x86_64
+          chmod +x envoy
+          sudo cp envoy /usr/bin/envoy
+          sudo chmod +x /usr/bin/envoy
+
+      - name: test
+        run: |
+          go test test/e2e_tls_test.go test/common.go

@@ -23,8 +23,8 @@ import (
 	"time"
 )
 
-func TestBind(t *testing.T) {
-	startEnvoyBind("localhost", 3893, "dc=glauth,dc=com", "cn")
+func TestBindTLS(t *testing.T) {
+	startEnvoyTLS("localhost", 3894, "dc=glauth,dc=com", "cn")
 	time.Sleep(5 * time.Second)
 	req, err := http.NewRequest(http.MethodGet, "http://localhost:10000/", nil)
 	resp1, err := http.DefaultClient.Do(req)
@@ -56,5 +56,5 @@ func TestBind(t *testing.T) {
 	if resp4.StatusCode != http.StatusOK {
 		t.Fatalf("unexpected status code: %v", resp4.StatusCode)
 	}
-	t.Log("TestBind passed")
+	t.Log("TestBindTLS passed")
 }
